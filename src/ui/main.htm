@@ -1,0 +1,27 @@
+<html window-frame="solid" window-blurbehind="light">
+  <head>
+    <style>
+      html {
+        background: transparent;
+      }
+      #query {
+        background: transparent;
+        font-size:36dip;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <input id="query" placeholder="Test" />
+    <script>
+      console.log('Hello world!');
+      const queryInput = document.querySelector('#query');
+      queryInput.addEventListener('input', () => {
+        const query = queryInput.value;
+        if (query === 'x') {
+          Window.this.close();
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -5,6 +5,9 @@ authors = ["Nick Hilton <nhilton777@gmail.com>"]
 license = "MIT/Apache-2.0"
 edition = "2018"
 
+[dependencies]
+sciter-rs = "*"
+
 [dependencies.windows]
 version = "0.39.0"
 features = [
