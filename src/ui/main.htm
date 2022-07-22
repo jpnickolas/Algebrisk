@@ -1,26 +1,89 @@
-<html window-frame="solid" window-blurbehind="light">
+<html window-frame="transparent">
   <head>
     <style>
       html {
+        margin: 0;
+        padding: 0;
         background: transparent;
+        max-height: 200dip;
+        color: rgb(70, 70, 70);
+      }
+      body {
+        max-height: 200dip;
+        margin: 4dip;
+        overflow: hidden;
+        border-radius: 24dip;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1dip solid rgba(225, 225, 225, 0.7);
+        box-shadow: 0 0 8dip -4dip rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        height: auto;
       }
       #query {
         background: transparent;
-        font-size:36dip;
+        font-size: 32pt;
+        font-family: Verdana;
+        font-rendering-mode: sub-pixel;
+        color: rgb(70, 70, 70);
         border: none;
+        width: 100%;
+        margin: 0;
+        flex-shrink: 0;
+        padding: 12dip;
+      }
+      .separator {
+        height: 1dip;
+        margin: 0 auto;
+        width: 100%;
+        background: linear-gradient(
+          to right,
+          transparent 0%,
+          rgba(100, 100, 100, 0.5) 10%,
+          rgba(100, 100, 100, 0.5) 90%,
+          transparent 100%
+        );
+      }
+      #answer-container {
+        display: none;
+        margin: 0;
+      }
+      #answer {
+        font-size: 32pt;
+        margin: 0 auto;
+        display: inline-block;
+        padding: 12dip;
       }
     </style>
   </head>
   <body>
-    <input id="query" placeholder="Test" />
+    <div class="container">
+      <input id="query" placeholder="Enter a mathmatical expression" />
+      <div id="answer-container">
+        <div class="separator" />
+        <span id="answer">
+      </div>
+    </div>
     <script>
-      console.log('Hello world!');
-      const queryInput = document.querySelector('#query');
-      queryInput.addEventListener('input', () => {
-        const query = queryInput.value;
-        if (query === 'x') {
+      Window.this.on('statechange', () => {
+        queryInput.value = '';
+        Window.this.activate(true);
+      });
+
+      document.addEventListener('keydown', e => {
+        if (e.code === 'Escape') {
+          Window.this.state = 4;
+        } else if (e.code === 'KeyQ') {
           Window.this.close();
         }
+      });
+
+      const queryInput = document.querySelector('#query');
+      const answer = document.querySelector('#answer');
+      const answerContainer = document.querySelector('#answer-container');
+      queryInput.addEventListener('input', () => {
+        answer.innerText = queryInput.value;
+        answerContainer.style.display = queryInput.value === '' ? 'none' : 'block';
       });
     </script>
   </body>

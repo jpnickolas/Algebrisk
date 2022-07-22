@@ -14,7 +14,7 @@ fn open_calc() {
   sciter::set_options(sciter::RuntimeOptions::DebugMode(true)).unwrap();
 
   let mut frame = sciter::window::Builder::main_window()
-    .with_size((800, 80))
+    .with_size((800, 200))
     .with_pos((300, 300))
     // .alpha()
     .glassy()
@@ -28,9 +28,22 @@ fn open_calc() {
     .expect("Unable to load archive");
 
   frame.load_file("this://app/main.htm");
-  frame.expand(false);
-  frame.run_app();
+  frame.collapse(true);
+  // frame.run_app();
   // let mut window = frame.get_hwnd();
+
+  unsafe {
+    println!("Waiting for WIN+`");
+    let mut msg = MSG::default();
+    while GetMessageA(&mut msg, windows::Win32::Foundation::HWND(0), 0, 0).into() {
+      if msg.message == WM_HOTKEY {
+        frame.expand(false);
+        // SetFocus(frame.get_hwnd());
+      }
+      TranslateMessage(&mut msg);
+      DispatchMessageW(&mut msg);
+    }
+  }
 }
 
 fn main() -> windows::core::Result<()> {
@@ -43,16 +56,9 @@ fn main() -> windows::core::Result<()> {
       MOD_WIN | MOD_NOREPEAT,
       0xC0, /* the `~ key*/
     );
-
-    let mut msg = MSG::default();
-    while GetMessageA(&mut msg, windows::Win32::Foundation::HWND(0), 0, 0).into() {
-      if msg.message == WM_HOTKEY {
-        println!("TEST");
-        open_calc();
-        break;
-      }
-    }
   }
+
+  open_calc();
 
   return Ok(());
 }
