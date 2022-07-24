@@ -5,7 +5,6 @@
         margin: 0;
         padding: 0;
         background: transparent;
-        max-height: 200dip;
         color: rgb(70, 70, 70);
       }
       body {
@@ -13,7 +12,7 @@
         margin: 4dip;
         overflow: hidden;
         border-radius: 24dip;
-        background: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.9);
         border: 1dip solid rgba(225, 225, 225, 0.7);
         box-shadow: 0 0 8dip -4dip rgba(0, 0, 0, 0.7);
         display: flex;
@@ -24,7 +23,6 @@
         background: transparent;
         font-size: 32pt;
         font-family: Verdana;
-        font-rendering-mode: sub-pixel;
         color: rgb(70, 70, 70);
         border: none;
         width: 100%;
@@ -55,6 +53,7 @@
         padding: 12dip;
       }
     </style>
+    <script src="math.js"></script>
   </head>
   <body>
     <div class="container">
@@ -64,13 +63,19 @@
         <span id="answer">
       </div>
     </div>
-    <script>
+    <script type="module">
+      const queryInput = document.querySelector('#query');
+      const answerEl = document.querySelector('#answer');
+      const answerContainer = document.querySelector('#answer-container');
+
       Window.this.on('statechange', () => {
         queryInput.value = '';
+        answerEl.innerText = '';
+        answerContainer.style.display = 'none';
         Window.this.activate(true);
       });
 
-      document.addEventListener('keydown', e => {
+      document.addEventListener('keydown', async e => {
         if (e.code === 'Escape') {
           Window.this.state = 4;
         } else if (e.code === 'KeyQ') {
@@ -78,13 +83,19 @@
         }
       });
 
-      const queryInput = document.querySelector('#query');
-      const answer = document.querySelector('#answer');
-      const answerContainer = document.querySelector('#answer-container');
       queryInput.addEventListener('input', () => {
-        answer.innerText = queryInput.value;
-        answerContainer.style.display = queryInput.value === '' ? 'none' : 'block';
+        const answer = parseCalcExpr(queryInput.value);
+        answerEl.innerText = `${answer ?? ''}`;
+        answerContainer.style.display = answer == null ? 'none' : 'block';
       });
+
+      function parseCalcExpr(expr) {
+        try {
+          return globalThis.math.evaluate(expr);
+        } catch {
+          return null;
+        }
+      }
     </script>
   </body>
 </html>
