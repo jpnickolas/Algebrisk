@@ -1,4 +1,4 @@
-<html window-frame="transparent">
+<html window-frame="transparent" window-icon="app.png">
   <head>
     <style>
       html {
@@ -67,6 +67,13 @@
       const queryInput = document.querySelector('#query');
       const answerEl = document.querySelector('#answer');
       const answerContainer = document.querySelector('#answer-container');
+      
+      Graphics.Image.load(__DIR__ + "app.png").then((image) => {
+        Window.this.trayIcon({
+          image,
+          text: 'Algebrisk',
+        });
+      });
 
       Window.this.on('statechange', () => {
         queryInput.value = '';
@@ -74,12 +81,21 @@
         answerContainer.style.display = 'none';
         Window.this.activate(true);
       });
+      
+      Window.this.on('trayiconclick', (e) => {
+        new Window({
+          url: __DIR__ + "settings.htm",
+          type: Window.FRAME_WINDOW,
+          parameters: {
+            showSearchBar: () => Window.this.state = 1,
+            quit: () => Window.this.xcall('quit'),
+          }
+        });
+      });
 
       document.addEventListener('keydown', async e => {
         if (e.code === 'Escape') {
           Window.this.state = 4;
-        } else if (e.code === 'KeyQ') {
-          Window.this.close();
         }
       });
 

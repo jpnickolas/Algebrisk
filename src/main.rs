@@ -1,4 +1,4 @@
-#![windows_subsystem = "windows"]
+// #![windows_subsystem = "windows"]
 
 extern crate sciter;
 extern crate windows;
@@ -7,17 +7,29 @@ use windows::{
   Win32::Foundation::HWND, Win32::UI::Input::KeyboardAndMouse::*, Win32::UI::WindowsAndMessaging::*,
 };
 
+struct Handler {}
+
+impl Handler {
+  fn quit(&self) {
+    unsafe { PostQuitMessage(0) };
+  }
+}
+
+impl sciter::EventHandler for Handler {
+  sciter::dispatch_script_call! {
+    fn quit();
+  }
+}
+
 fn open_calc() {
   let assets = include_bytes!("../target/assets.rc");
 
   // Enable debug mode for all windows, so that we can inspect them via Inspector.
   sciter::set_options(sciter::RuntimeOptions::DebugMode(true)).unwrap();
 
-  let mut frame = sciter::window::Builder::main_window()
+  let mut frame = sciter::window::Builder::tool()
     .with_size((800, 200))
     .with_pos((300, 300))
-    // .alpha()
-    .glassy()
     .create();
 
   frame
@@ -26,6 +38,7 @@ fn open_calc() {
   frame
     .archive_handler(assets)
     .expect("Unable to load archive");
+  frame.event_handler(Handler {});
 
   frame.load_file("this://app/main.htm");
   frame.collapse(true);

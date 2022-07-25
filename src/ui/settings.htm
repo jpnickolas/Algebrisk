@@ -1,0 +1,22 @@
+<html>
+  <body>
+    Settings
+    <hr />
+    <p>Launch Shortcut</p>
+    <input value="Win+`" />
+    <button id="search">Show Search Bar</button>
+    <button id="quit">Quit Algebrisk</button>
+    <script>
+      const searchBtn = document.querySelector('#search');
+      const quitBtn = document.querySelector('#quit');
+
+      searchBtn.addEventListener('click', () => {
+        Window.this.parameters.showSearchBar();
+      });
+
+      quitBtn.addEventListener('click', () => {
+        Window.this.parameters.quit();
+      });
+    </script>
+  </body>
+</html>
