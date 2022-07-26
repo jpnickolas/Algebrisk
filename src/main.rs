@@ -1,5 +1,6 @@
 // #![windows_subsystem = "windows"]
 
+extern crate kalk;
 extern crate sciter;
 extern crate windows;
 
@@ -13,11 +14,26 @@ impl Handler {
   fn quit(&self) {
     unsafe { PostQuitMessage(0) };
   }
+
+  fn eval(&self, expr: String) -> sciter::Value {
+    let mut ctx = kalk::parser::Context::new();
+    let res = kalk::parser::eval(&mut ctx, &expr);
+    if res.is_err() {
+      return sciter::Value::null();
+    }
+
+    let res2 = res.unwrap();
+    if res2.is_none() {
+      return sciter::Value::null();
+    }
+    return sciter::Value::from(res2.unwrap().to_js_string());
+  }
 }
 
 impl sciter::EventHandler for Handler {
   sciter::dispatch_script_call! {
     fn quit();
+    fn eval(str);
   }
 }
 
@@ -46,12 +62,10 @@ fn open_calc() {
   // let mut window = frame.get_hwnd();
 
   unsafe {
-    println!("Waiting for WIN+`");
     let mut msg = MSG::default();
     while GetMessageA(&mut msg, windows::Win32::Foundation::HWND(0), 0, 0).into() {
       if msg.message == WM_HOTKEY {
         frame.expand(false);
-        // SetFocus(frame.get_hwnd());
       }
       TranslateMessage(&mut msg);
       DispatchMessageW(&mut msg);
@@ -60,8 +74,6 @@ fn open_calc() {
 }
 
 fn main() -> windows::core::Result<()> {
-  println!("Hello world!");
-
   unsafe {
     RegisterHotKey(
       HWND(0),

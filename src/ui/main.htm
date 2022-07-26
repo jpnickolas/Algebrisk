@@ -1,4 +1,4 @@
-<html window-frame="transparent" window-icon="app.png">
+<html window-frame="transparent">
   <head>
     <style>
       html {
@@ -53,7 +53,6 @@
         padding: 12dip;
       }
     </style>
-    <script src="math.js"></script>
   </head>
   <body>
     <div class="container">
@@ -88,7 +87,10 @@
           type: Window.FRAME_WINDOW,
           parameters: {
             showSearchBar: () => Window.this.state = 1,
-            quit: () => Window.this.xcall('quit'),
+            quit: () => {
+              Window.this.trayIcon('remove');
+              Window.this.xcall('quit')
+            },
           }
         });
       });
@@ -107,7 +109,8 @@
 
       function parseCalcExpr(expr) {
         try {
-          return globalThis.math.evaluate(expr);
+          return Window.this.xcall('eval', expr);
+          // return globalThis.math.evaluate(expr);
         } catch {
           return null;
         }

@@ -8,6 +8,10 @@ edition = "2018"
 [dependencies]
 sciter-rs = "*"
 
+[dependencies.kalk]
+version = "*"
+default-features = false
+
 [dependencies.windows]
 version = "0.39.0"
 features = [
