@@ -1,12 +1,11 @@
-<html>
+<html window-icon="app.png" window-title="Settings">
   <body>
-    Settings
-    <hr />
-    <p>Launch Shortcut</p>
-    <input value="Win+`" />
+    <p>Launch Shortcut <input value="Win+`" /></p>
+    <p><input type="checkbox" id="copyOnEnter" /> Copy when you press Enter</p>
+    <p><input type="checkbox" id="closeOnEnter" /> Close when you press Enter</p>
     <button id="search">Show Search Bar</button>
     <button id="quit">Quit Algebrisk</button>
-    <script>
+    <script type="module">
       const searchBtn = document.querySelector('#search');
       const quitBtn = document.querySelector('#quit');
 
@@ -16,6 +15,22 @@
 
       quitBtn.addEventListener('click', () => {
         Window.this.parameters.quit();
+      });
+
+      const settings = Window.this.parameters.getSettings();
+      const copyOnEnter = document.querySelector('#copyOnEnter');
+      const closeOnEnter = document.querySelector('#closeOnEnter');
+
+      copyOnEnter.checked = settings.root.copyOnEnter;
+      copyOnEnter.addEventListener('input', () => {
+        settings.root.copyOnEnter = copyOnEnter.checked;
+        settings.commit();
+      });
+
+      closeOnEnter.checked = settings.root.closeOnEnter;
+      closeOnEnter.addEventListener('input', () => {
+        settings.root.closeOnEnter = closeOnEnter.checked;
+        settings.commit();
       });
     </script>
   </body>

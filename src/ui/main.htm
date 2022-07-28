@@ -52,6 +52,23 @@
         display: inline-block;
         padding: 12dip;
       }
+      #copy {
+        float: right;
+        margin: 22dip 12dip;
+        background: transparent;
+        border: none;
+        width: 32dip;
+        height: 32dip;
+        cursor: pointer;
+      }
+      #copy img {
+        width: 32dip;
+        height: 32dip;
+        fill: rgb(70, 70, 70);
+      }
+      #copy img:hover {
+        fill: rgb(120, 120, 120);
+      }
     </style>
   </head>
   <body>
@@ -59,13 +76,33 @@
       <input id="query" placeholder="Enter a mathmatical expression" />
       <div id="answer-container">
         <div class="separator" />
-        <span id="answer">
+        <div>
+          <span id="answer" />
+          <button id="copy" title="Copy answer text">
+            <img src="copy.svg" />
+          </button>
+        </div>
       </div>
     </div>
     <script type="module">
+      import * as Storage from "@storage";
+
+      const storage = Storage.open("algebrisk.db");
+      if (!storage.root) {
+        storage.root = {
+          version: 1,
+          copyOnEnter: true,
+          closeOnEnter: true,
+        };
+      }
+      document.on("beforeunload", () => {
+        storage.close();
+      });
+
       const queryInput = document.querySelector('#query');
       const answerEl = document.querySelector('#answer');
       const answerContainer = document.querySelector('#answer-container');
+      const copyEl = document.querySelector('#copy');
       
       Graphics.Image.load(__DIR__ + "app.png").then((image) => {
         Window.this.trayIcon({
@@ -85,12 +122,14 @@
         new Window({
           url: __DIR__ + "settings.htm",
           type: Window.FRAME_WINDOW,
+          caption: 'Settings',
           parameters: {
             showSearchBar: () => Window.this.state = 1,
             quit: () => {
               Window.this.trayIcon('remove');
               Window.this.xcall('quit')
             },
+            getSettings: () => storage,
           }
         });
       });
@@ -98,6 +137,14 @@
       document.addEventListener('keydown', async e => {
         if (e.code === 'Escape') {
           Window.this.state = 4;
+        }
+        if (e.code === 'Enter') {
+          if (storage.root.copyOnEnter) {
+            copyTextToClipboard();
+          }
+          if (storage.root.closeOnEnter) {
+            Window.this.state = 4;
+          }
         }
       });
 
@@ -110,11 +157,21 @@
       function parseCalcExpr(expr) {
         try {
           return Window.this.xcall('eval', expr);
-          // return globalThis.math.evaluate(expr);
         } catch {
           return null;
         }
       }
+
+      function copyTextToClipboard() {
+        if (answerEl.innerText !== '') {
+          Clipboard.writeText(answerEl.innerText);
+        }
+      }
+      
+      document.on("beforeunload", () => {
+        storage.close();
+      });
+      copyEl.addEventListener('click', copyTextToClipboard);
     </script>
   </body>
 </html>
