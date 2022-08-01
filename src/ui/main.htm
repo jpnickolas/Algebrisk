@@ -93,6 +93,8 @@
           version: 1,
           copyOnEnter: true,
           closeOnEnter: true,
+          maxHistory: 50,
+          history: [],
         };
       }
       document.on("beforeunload", () => {
@@ -118,6 +120,7 @@
         Window.this.activate(true);
       });
       
+      let currentHistoricalIndex = storage.root.history.length;
       Window.this.on('trayiconclick', (e) => {
         new Window({
           url: __DIR__ + "settings.htm",
@@ -136,23 +139,35 @@
 
       document.addEventListener('keydown', async e => {
         if (e.code === 'Escape') {
-          Window.this.state = 4;
+          closeWindow();
         }
         if (e.code === 'Enter') {
           if (storage.root.copyOnEnter) {
             copyTextToClipboard();
           }
           if (storage.root.closeOnEnter) {
-            Window.this.state = 4;
+            closeWindow();
           }
+        }
+        if (e.code === 'ArrowUp') {
+          currentHistoricalIndex = Math.max(currentHistoricalIndex - 1, 0);
+          queryInput.value = storage.root.history[currentHistoricalIndex];
+          calcExpr();
+        } else if (e.code === 'ArrowDown') {
+          currentHistoricalIndex = Math.min(currentHistoricalIndex + 1, storage.root.history.length);
+          queryInput.value = storage.root.history[currentHistoricalIndex];
+          calcExpr();
+        } else {
+          currentHistoricalIndex = storage.root.history.length;
         }
       });
 
-      queryInput.addEventListener('input', () => {
+      function calcExpr() {
         const answer = parseCalcExpr(queryInput.value);
         answerEl.innerText = `${answer ?? ''}`;
         answerContainer.style.display = answer == null ? 'none' : 'block';
-      });
+      }
+      queryInput.addEventListener('input', calcExpr);
 
       function parseCalcExpr(expr) {
         try {
@@ -166,6 +181,18 @@
         if (answerEl.innerText !== '') {
           Clipboard.writeText(answerEl.innerText);
         }
+      }
+
+      function closeWindow() {
+        if (queryInput.value.length > 0) {
+          storage.root.history.push(queryInput.value);
+          if (storage.root.history.length > storage.root.maxHistory) {
+            storage.root.history.splice(0, storage.root.history.length - storage.root.maxHistory);
+          }
+          currentHistoricalIndex = storage.root.history.push();
+        }
+
+        Window.this.state = 4;
       }
       
       document.on("beforeunload", () => {

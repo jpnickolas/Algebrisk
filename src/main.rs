@@ -51,6 +51,7 @@ fn open_calc() {
   frame
     .set_options(sciter::window::Options::TransparentWindow(true))
     .unwrap();
+
   frame
     .archive_handler(assets)
     .expect("Unable to load archive");
