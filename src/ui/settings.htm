@@ -1,11 +1,31 @@
 <html window-icon="app.png" window-title="Settings">
   <body>
-    <p>Launch Shortcut <input value="Win+`" /></p>
-    <p><input type="checkbox" id="copyOnEnter" /> Copy when you press Enter</p>
-    <p><input type="checkbox" id="closeOnEnter" /> Close when you press Enter</p>
+    <p>
+      <label><input type="checkbox" id="copyOnEnter" /> Copy when you press Enter</label>
+    </p>
+    <p>
+      <label><input type="checkbox" id="closeOnEnter" /> Close when you press Enter</label>
+    </p>
+    <p>
+      <label>Launch Shortcut <input value="Win+`" /></label>
+    </p>
+    <p>
+      <label>
+        Theme
+        <select id="theme">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="system">System</option>
+        </select>
+      </label>
+    </p>
     <button id="search">Show Search Bar</button>
     <button id="quit">Quit Algebrisk</button>
     <script type="module">
+      import * as Storage from "@storage";
+
+      // const settings = Storage.open("algebrisk.db", false);
+
       const searchBtn = document.querySelector('#search');
       const quitBtn = document.querySelector('#quit');
 
@@ -20,6 +40,7 @@
       const settings = Window.this.parameters.getSettings();
       const copyOnEnter = document.querySelector('#copyOnEnter');
       const closeOnEnter = document.querySelector('#closeOnEnter');
+      const themeInput = document.querySelector('#theme');
 
       copyOnEnter.checked = settings.root.copyOnEnter;
       copyOnEnter.addEventListener('input', () => {
@@ -30,6 +51,13 @@
       closeOnEnter.checked = settings.root.closeOnEnter;
       closeOnEnter.addEventListener('input', () => {
         settings.root.closeOnEnter = closeOnEnter.checked;
+        settings.commit();
+      });
+      
+      themeInput.value = settings.root.theme;
+      themeInput.addEventListener('change', () => {
+        settings.root.theme = themeInput.value;
+        Window.this.parameters.applyTheme();
         settings.commit();
       });
     </script>

@@ -5,25 +5,34 @@
         margin: 0;
         padding: 0;
         background: transparent;
-        color: rgb(70, 70, 70);
       }
       body {
+        --bg-color: #ddd;
+        --border-color: #aaa;
+        --text-color: #444;
         max-height: 200dip;
         margin: 4dip;
         overflow: hidden;
         border-radius: 24dip;
-        background: rgba(255, 255, 255, 0.9);
-        border: 1dip solid rgba(225, 225, 225, 0.7);
         box-shadow: 0 0 8dip -4dip rgba(0, 0, 0, 0.7);
         display: flex;
         flex-direction: column;
         height: auto;
+        background: var(--bg-color);
+        border: 1dip solid var(--border-color);
+        color: var(--text-color);
+      }
+      body.dark-mode {
+        --bg-color: #222;
+        --border-color: #111;
+        --text-color: #bbb;
       }
       #query {
         background: transparent;
         font-size: 32pt;
         font-family: Verdana;
-        color: rgb(70, 70, 70);
+        color: var(--text-color);
+        text-selection-caret-color: var(--text-color);
         border: none;
         width: 100%;
         margin: 0;
@@ -33,12 +42,12 @@
       .separator {
         height: 1dip;
         margin: 0 auto;
-        width: 100%;
+        width: 95%;
         background: linear-gradient(
           to right,
           transparent 0%,
-          rgba(100, 100, 100, 0.5) 10%,
-          rgba(100, 100, 100, 0.5) 90%,
+          var(--text-color) 10%,
+          var(--text-color) 90%,
           transparent 100%
         );
       }
@@ -64,14 +73,14 @@
       #copy img {
         width: 32dip;
         height: 32dip;
-        fill: rgb(70, 70, 70);
+        fill: var(--text-color);
       }
       #copy img:hover {
         fill: rgb(120, 120, 120);
       }
     </style>
   </head>
-  <body>
+  <body class="dark-mode">
     <div class="container">
       <input id="query" placeholder="Enter a mathmatical expression" />
       <div id="answer-container">
@@ -87,15 +96,17 @@
     <script type="module">
       import * as Storage from "@storage";
 
-      const storage = Storage.open("algebrisk.db");
+      const storage = Storage.open("./algebrisk.db");
       if (!storage.root) {
         storage.root = {
-          version: 1,
+          version: 2,
           copyOnEnter: true,
           closeOnEnter: true,
           maxHistory: 50,
           history: [],
+          theme: 'light',
         };
+        storage.commit();
       }
       document.on("beforeunload", () => {
         storage.close();
@@ -120,12 +131,13 @@
         Window.this.activate(true);
       });
       
-      let currentHistoricalIndex = storage.root.history.length;
       Window.this.on('trayiconclick', (e) => {
         new Window({
           url: __DIR__ + "settings.htm",
           type: Window.FRAME_WINDOW,
           caption: 'Settings',
+          width: 260,
+          height: 200,
           parameters: {
             showSearchBar: () => Window.this.state = 1,
             quit: () => {
@@ -133,10 +145,12 @@
               Window.this.xcall('quit')
             },
             getSettings: () => storage,
+            applyTheme: () => applyTheme(),
           }
         });
       });
 
+      let currentHistoricalIndex = storage.root.history.length;
       document.addEventListener('keydown', async e => {
         if (e.code === 'Escape') {
           closeWindow();
@@ -199,6 +213,17 @@
         storage.close();
       });
       copyEl.addEventListener('click', copyTextToClipboard);
+
+      function applyTheme() {
+        let theme = storage.root.theme;
+        if (theme !== 'dark' && theme !== 'light') {
+          theme = Window.this.xcall('get_system_theme');
+        }
+
+        document.body.classList.toggle('dark-mode', theme === 'dark');
+      }
+      applyTheme();
+      globalThis.applyTheme = applyTheme;
     </script>
   </body>
 </html>
