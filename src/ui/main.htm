@@ -98,8 +98,8 @@
 
       const storage = Storage.open("./algebrisk.db");
       if (!storage.root) {
-        console.log('rip');
         storage.root = {
+          version: 1,
           copyOnEnter: true,
           closeOnEnter: true,
           maxHistory: 50,
@@ -115,9 +115,13 @@
         storage.root.shortcut = 'win+`';
       };
 
-      document.on("beforeunload", () => {
+      function quit() {
+        storage.commit();
         storage.close();
-      });
+        Window.this.trayIcon('remove');
+        Window.this.xcall('quit');
+      }
+      document.on("beforeunload", quit);
 
       const queryInput = document.querySelector('#query');
       const answerEl = document.querySelector('#answer');
@@ -143,15 +147,11 @@
         type: Window.FRAME_WINDOW,
         caption: 'Settings',
         width: 260,
-        height: 210,
+        height: 240,
         state: 4, // Hidden
         parameters: {
           showSearchBar: () => Window.this.state = 1,
-          quit: () => {
-            Window.this.trayIcon('remove');
-            Window.this.xcall('quit')
-          },
-          getSettings: () => storage,
+          quit,
           applyTheme: () => applyTheme(),
           register_shortcut: (shortcut) => Window.this.xcall('register_shortcut', shortcut),
           readSetting: (key) => storage.root[key],
@@ -163,6 +163,7 @@
       
       Window.this.on('trayiconclick', (e) => {
         settingsWindow.state = 1;
+        settingsWindow.activate();
       });
 
       let currentHistoricalIndex = storage.root.history.length;
@@ -236,6 +237,8 @@
         }
 
         document.body.classList.toggle('dark-mode', theme === 'dark');
+        settingsWindow
+          .document.body.classList.toggle('dark-mode', theme === 'dark');
       }
       applyTheme();
       globalThis.applyTheme = applyTheme;

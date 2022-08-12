@@ -1,10 +1,34 @@
-<html window-icon="app.png" window-title="Settings">
+<html window-icon="app.png" window-title="Settings" window-frame="extended">
   <head>
     <style>
+      html {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        --bg-color: rgb(255, 255, 255);
+        --border-color: #aaa;
+        --text-color: #444;
+        --accent-bg: rgb(230, 230, 230);
+        padding: 0;
+        margin: 0;
+        background: var(--bg-color);
+        color: var(--text-color);
+        overflow: hidden;
+      }
+      body.dark-mode {
+        --bg-color: #222;
+        --border-color: rgb(100, 100, 100);
+        --text-color: rgb(240, 240, 240);
+        --accent-bg: rgb(50, 50, 50);
+      }
+
       .container {
+        padding: 4dip 12dip;
         display: flex;
         flex-direction: column;
         height: 1*;
+        overflow: auto;
       }
       .settings {
         display: flex;
@@ -18,15 +42,81 @@
         flex-shrink: 0;
       }
       #shortcut-error {
-        color: rgb(134, 0, 0);
+        color: rgb(204, 0, 0);
         font-size: 10px;
       }
-      select, button {
+      select, button, input[type="text"] {
         background: rgba(200, 200, 200, 0.5);
+        width: 1*;
+        border-color: var(--border-color);
+        text-selection-caret-color: var(--text-color);
+        color: var(--text-color);
+        background: var(--accent-bg);
+      }
+      select > button {
+        background: transparent;
+        width: 1.6em;
+        fill: var(--text-color);
+      }
+      select > popup.list {
+        background: var(--accent-bg);
+      }
+      .footer button {
+        margin-bottom: 8px;
+      }
+
+      header {
+        width:*;
+        flow:horizontal;
+        height:window-caption-height;
+        margin:0;
+        background: var(--accent-bg);
+      }
+      header window-button {
+        background: transparent;
+        color: var(--text-color);
+        border-radius: 0;
+        width: auto;
+        behavior:clickable; 
+        display:block; 
+        height:window-caption-height; 
+        width:window-button-width; 
+        foreground-size: 11dip;
+        foreground-repeat: no-repeat;
+        foreground-position:50% 50%;
+        stroke:color(text-color);
+        stroke-width:1dip;
+        stroke-width:1.44dip;
+        foreground-image: url(path:M0 0 L10 10 M10 0 L0 10);
+      }
+      header window-button:hover {
+        background:rgba(0,0,0,0.25); 
+        transition: background-color(linear,100ms);
+        background:rgb(232,17,35); stroke:#fff;
+      }
+      header window-caption {
+        display:block;
+        line-height:window-caption-height;
+        width:1*;
+        padding:0;
+        color:color(text-color);
+      }
+      header window-icon {
+        display: block;
+        background: url(app.png) no-repeat 50% 50%;
+        background-size: 16dip;
+        size: window-caption-height;
       }
     </style>
   </head>
   <body>
+    <header>
+      <window-icon role=window-icon></window-icon>
+      <window-caption role=window-caption>Algebrisk</window-caption>
+      <window-buttons>
+        <window-button role="window-close"></window-button>
+      </window-buttons>
+    </header>
     <div class="container">
       <div class="settings">
         <p>
@@ -36,7 +126,7 @@
           <label><input type="checkbox" id="closeOnEnter" /> Close when you press Enter</label>
         </p>
         <p>
-          <label>Launch Shortcut <input id="shortcut" /></label>
+          <label>Launch Shortcut <input id="shortcut" type="text" /></label>
           <span id="shortcut-error"></span>
         </p>
         <p>
