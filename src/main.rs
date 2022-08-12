@@ -2,12 +2,16 @@
 
 extern crate dark_light;
 extern crate kalk;
+extern crate msw_hotkey;
 extern crate sciter;
 extern crate windows;
 
+use msw_hotkey::Hotkey;
 use windows::{
   Win32::Foundation::HWND, Win32::UI::Input::KeyboardAndMouse::*, Win32::UI::WindowsAndMessaging::*,
 };
+
+static mut LAST_KEYBOARD_SHORTCUT_ID: i32 = 0;
 
 struct Handler {}
 
@@ -42,6 +46,33 @@ impl Handler {
       }
     }
   }
+
+  fn register_shortcut(&self, shortcut: String) -> sciter::Value {
+    let result = shortcut.parse::<Hotkey>();
+    if result.is_err() {
+      return sciter::Value::from(result.unwrap_err().to_string());
+    }
+    let hotkey = result.unwrap();
+
+    unsafe {
+      let keyboard_shortcut_id = LAST_KEYBOARD_SHORTCUT_ID + 1;
+      let result = RegisterHotKey(
+        HWND(0),
+        keyboard_shortcut_id,
+        HOT_KEY_MODIFIERS(hotkey.modifier() as u32) | MOD_NOREPEAT,
+        VkKeyScanA(windows::Win32::Foundation::CHAR(hotkey.key())) as u32,
+      );
+      if !result.as_bool() {
+        return sciter::Value::from("Could not register hotkey. Please try again.");
+      }
+
+      if LAST_KEYBOARD_SHORTCUT_ID > 0 {
+        UnregisterHotKey(HWND(0), LAST_KEYBOARD_SHORTCUT_ID);
+      }
+      LAST_KEYBOARD_SHORTCUT_ID = keyboard_shortcut_id;
+    }
+    return sciter::Value::from(true);
+  }
 }
 
 impl sciter::EventHandler for Handler {
@@ -49,6 +80,7 @@ impl sciter::EventHandler for Handler {
     fn quit();
     fn eval(str);
     fn get_system_theme();
+    fn register_shortcut(str);
   }
 }
 
@@ -99,15 +131,6 @@ fn open_calc() {
 }
 
 fn main() -> windows::core::Result<()> {
-  unsafe {
-    RegisterHotKey(
-      HWND(0),
-      1,
-      MOD_WIN | MOD_NOREPEAT,
-      0xC0, /* the `~ key*/
-    );
-  }
-
   open_calc();
 
   return Ok(());

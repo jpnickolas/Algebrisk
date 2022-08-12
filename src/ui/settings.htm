@@ -1,31 +1,61 @@
 <html window-icon="app.png" window-title="Settings">
+  <head>
+    <style>
+      .container {
+        display: flex;
+        flex-direction: column;
+        height: 1*;
+      }
+      .settings {
+        display: flex;
+        flex-grow: 1;
+        flex-shrink: 1;
+        height: 1*;
+      }
+      .footer {
+        display: flex;
+        flex-grow: 0;
+        flex-shrink: 0;
+      }
+      #shortcut-error {
+        color: rgb(134, 0, 0);
+        font-size: 10px;
+      }
+      select, button {
+        background: rgba(200, 200, 200, 0.5);
+      }
+    </style>
+  </head>
   <body>
-    <p>
-      <label><input type="checkbox" id="copyOnEnter" /> Copy when you press Enter</label>
-    </p>
-    <p>
-      <label><input type="checkbox" id="closeOnEnter" /> Close when you press Enter</label>
-    </p>
-    <p>
-      <label>Launch Shortcut <input value="Win+`" /></label>
-    </p>
-    <p>
-      <label>
-        Theme
-        <select id="theme">
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-          <option value="system">System</option>
-        </select>
-      </label>
-    </p>
-    <button id="search">Show Search Bar</button>
-    <button id="quit">Quit Algebrisk</button>
+    <div class="container">
+      <div class="settings">
+        <p>
+          <label><input type="checkbox" id="copyOnEnter" /> Copy when you press Enter</label>
+        </p>
+        <p>
+          <label><input type="checkbox" id="closeOnEnter" /> Close when you press Enter</label>
+        </p>
+        <p>
+          <label>Launch Shortcut <input id="shortcut" /></label>
+          <span id="shortcut-error"></span>
+        </p>
+        <p>
+          <label>
+            Theme
+            <select id="theme">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="system">System</option>
+            </select>
+          </label>
+        </p>
+      </div>
+      <div class="footer">
+        <button id="search">Show Search Bar</button>
+        <button id="quit">Quit Algebrisk</button>
+      </div>
+    </div>
     <script type="module">
-      import * as Storage from "@storage";
-
-      // const settings = Storage.open("algebrisk.db", false);
-
       const searchBtn = document.querySelector('#search');
       const quitBtn = document.querySelector('#quit');
 
@@ -37,28 +67,50 @@
         Window.this.parameters.quit();
       });
 
-      const settings = Window.this.parameters.getSettings();
       const copyOnEnter = document.querySelector('#copyOnEnter');
       const closeOnEnter = document.querySelector('#closeOnEnter');
       const themeInput = document.querySelector('#theme');
 
-      copyOnEnter.checked = settings.root.copyOnEnter;
+      copyOnEnter.checked = Window.this.parameters.readSetting('copyOnEnter');
       copyOnEnter.addEventListener('input', () => {
-        settings.root.copyOnEnter = copyOnEnter.checked;
-        settings.commit();
+        Window.this.parameters.saveSetting('copyOnEnter', copyOnEnter.checked);
       });
 
-      closeOnEnter.checked = settings.root.closeOnEnter;
+      closeOnEnter.checked = Window.this.parameters.readSetting('closeOnEnter');
       closeOnEnter.addEventListener('input', () => {
-        settings.root.closeOnEnter = closeOnEnter.checked;
-        settings.commit();
+        Window.this.parameters.saveSetting('closeOnEnter', closeOnEnter.checked);
       });
       
-      themeInput.value = settings.root.theme;
+      themeInput.value = Window.this.parameters.readSetting('theme');
       themeInput.addEventListener('change', () => {
-        settings.root.theme = themeInput.value;
+        Window.this.parameters.saveSetting('theme', themeInput.value);
         Window.this.parameters.applyTheme();
-        settings.commit();
+      });
+      
+      const shortcutInput = document.querySelector('#shortcut');
+      const shortcutErr = document.querySelector('#shortcut-error');
+      shortcutInput.value = Window.this.parameters.readSetting('shortcut');
+      shortcutInput.addEventListener('change', () => {
+        const shortcut = shortcutInput.value;
+        if (shortcut === Window.this.parameters.readSetting('shortcut')) {
+          shortcutErr.style.display = 'none';
+          return;
+        }
+
+        let result = Window.this.parameters.register_shortcut(shortcut);
+        if (result === true) {
+          shortcutErr.style.display = 'none';
+          Window.this.parameters.saveSetting('shortcut', shortcut);
+        } else {
+          shortcutErr.style.display = 'block';
+          shortcutErr.innerText = result;
+        }
+      });
+
+
+      document.on('closerequest', (event) =>{
+        event.preventDefault();
+        Window.this.state = 4;
       });
     </script>
   </body>

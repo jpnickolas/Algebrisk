@@ -98,16 +98,23 @@
 
       const storage = Storage.open("./algebrisk.db");
       if (!storage.root) {
+        console.log('rip');
         storage.root = {
-          version: 2,
           copyOnEnter: true,
           closeOnEnter: true,
           maxHistory: 50,
           history: [],
           theme: 'light',
+          shortcut: 'win+`'
         };
         storage.commit();
       }
+
+      if (Window.this.xcall('register_shortcut', storage.root.shortcut) !== true) {
+        Window.this.xcall('register_shortcut', 'win+`');
+        storage.root.shortcut = 'win+`';
+      };
+
       document.on("beforeunload", () => {
         storage.close();
       });
@@ -130,24 +137,32 @@
         answerContainer.style.display = 'none';
         Window.this.activate(true);
       });
+
+      const settingsWindow = new Window({
+        url: __DIR__ + "settings.htm",
+        type: Window.FRAME_WINDOW,
+        caption: 'Settings',
+        width: 260,
+        height: 210,
+        state: 4, // Hidden
+        parameters: {
+          showSearchBar: () => Window.this.state = 1,
+          quit: () => {
+            Window.this.trayIcon('remove');
+            Window.this.xcall('quit')
+          },
+          getSettings: () => storage,
+          applyTheme: () => applyTheme(),
+          register_shortcut: (shortcut) => Window.this.xcall('register_shortcut', shortcut),
+          readSetting: (key) => storage.root[key],
+          saveSetting: (key, value) => {
+            storage.root[key] = value;
+        },
+        }
+      });
       
       Window.this.on('trayiconclick', (e) => {
-        new Window({
-          url: __DIR__ + "settings.htm",
-          type: Window.FRAME_WINDOW,
-          caption: 'Settings',
-          width: 260,
-          height: 200,
-          parameters: {
-            showSearchBar: () => Window.this.state = 1,
-            quit: () => {
-              Window.this.trayIcon('remove');
-              Window.this.xcall('quit')
-            },
-            getSettings: () => storage,
-            applyTheme: () => applyTheme(),
-          }
-        });
+        settingsWindow.state = 1;
       });
 
       let currentHistoricalIndex = storage.root.history.length;

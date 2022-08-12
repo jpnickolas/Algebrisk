@@ -23,6 +23,7 @@ version = "0.0.1"
 dependencies = [
  "dark-light",
  "kalk",
+ "msw-hotkey",
  "sciter-rs",
  "windows",
 ]
@@ -442,6 +443,12 @@ checksum = "5aa361d4faea93603064a027415f07bd8e1d5c88c9fbf68bf56a285428fd79ce"
 dependencies = [
  "autocfg",
 ]
+
+[[package]]
+name = "msw-hotkey"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "300c2cbf4abc54deec2c54df1300bee9755f78e3c7f0096bf45cfc198198ffe7"
 
 [[package]]
 name = "nix"
