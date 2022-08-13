@@ -145,7 +145,7 @@
       const settingsWindow = new Window({
         url: __DIR__ + "settings.htm",
         type: Window.FRAME_WINDOW,
-        caption: 'Settings',
+        caption: 'Algebrisk: Settings',
         width: 260,
         height: 240,
         state: 4, // Hidden
@@ -163,7 +163,7 @@
       
       Window.this.on('trayiconclick', (e) => {
         settingsWindow.state = 1;
-        settingsWindow.activate();
+        settingsWindow.activate(true);
       });
 
       let currentHistoricalIndex = storage.root.history.length;

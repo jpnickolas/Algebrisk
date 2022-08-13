@@ -1,6 +1,7 @@
-// #![windows_subsystem = "windows"]
+#![windows_subsystem = "windows"]
 
 extern crate dark_light;
+extern crate directories;
 extern crate kalk;
 extern crate msw_hotkey;
 extern crate sciter;
@@ -8,7 +9,8 @@ extern crate windows;
 
 use msw_hotkey::Hotkey;
 use windows::{
-  Win32::Foundation::HWND, Win32::UI::Input::KeyboardAndMouse::*, Win32::UI::WindowsAndMessaging::*,
+  Win32::Foundation::HWND, Win32::System::Registry::*, Win32::UI::Input::KeyboardAndMouse::*,
+  Win32::UI::WindowsAndMessaging::*,
 };
 
 static mut LAST_KEYBOARD_SHORTCUT_ID: i32 = 0;
@@ -114,7 +116,7 @@ fn open_calc() {
 
   unsafe {
     let mut msg = MSG::default();
-    while GetMessageA(&mut msg, windows::Win32::Foundation::HWND(0), 0, 0).into() {
+    while GetMessageA(&mut msg, HWND(0), 0, 0).into() {
       if msg.message == WM_HOTKEY {
         frame.expand(false);
       }
@@ -130,8 +132,65 @@ fn open_calc() {
   }
 }
 
-fn main() -> windows::core::Result<()> {
-  open_calc();
+fn try_set_open_on_startup() {
+  let mut hkey = HKEY(0);
+  let path = std::env::current_exe().unwrap().canonicalize().unwrap();
+  let mut path_str = path.to_str().unwrap();
+  if path_str.starts_with("\\\\?\\") {
+    path_str = path_str.strip_prefix("\\\\?\\").unwrap();
+  }
+  let path_bytes = path_str.as_bytes();
+  unsafe {
+    RegCreateKeyA(
+      HKEY_CURRENT_USER,
+      windows::s!("Software\\Microsoft\\Windows\\CurrentVersion\\Run"),
+      &mut hkey,
+    );
+    RegSetValueExA(
+      hkey,
+      windows::s!("Algebrisk"),
+      0,
+      REG_SZ,
+      &path_bytes[0],
+      path_str.len() as u32,
+    );
+  }
+}
 
+fn init_working_dir() {
+  let project = directories::ProjectDirs::from("", "", "Algebrisk").unwrap();
+  let working_dir = project.config_dir();
+  if !working_dir.is_dir() {
+    std::fs::create_dir_all(working_dir).unwrap();
+  }
+  std::env::set_current_dir(working_dir).unwrap();
+}
+
+fn is_already_running() -> bool {
+  // Just look for the settings window of another running algebrisk exe. There
+  // is a brief window where two executables can be launched at the same time
+  // before the settings window is created, but having two launched isn't that
+  // big of a deal.
+  unsafe {
+    let existing_app_settings_window = FindWindowA(
+      windows::core::PCSTR(std::ptr::null()),
+      windows::s!("Algebrisk: Settings"),
+    );
+    println!("{}", existing_app_settings_window.0);
+    if existing_app_settings_window.0 != 0 {
+      ShowWindow(existing_app_settings_window, SW_SHOW);
+      SetForegroundWindow(existing_app_settings_window);
+      return true;
+    }
+    return false;
+}
+
+fn main() -> windows::core::Result<()> {
+  if is_already_running() {
+    return Ok(());
+  }
+  init_working_dir();
+  try_set_open_on_startup();
+  open_calc();
   return Ok(());
 }
