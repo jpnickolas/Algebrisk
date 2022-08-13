@@ -1,4 +1,4 @@
-#![windows_subsystem = "windows"]
+// #![windows_subsystem = "windows"]
 
 extern crate dark_light;
 extern crate directories;
@@ -176,13 +176,13 @@ fn is_already_running() -> bool {
       windows::core::PCSTR(std::ptr::null()),
       windows::s!("Algebrisk: Settings"),
     );
-    println!("{}", existing_app_settings_window.0);
     if existing_app_settings_window.0 != 0 {
       ShowWindow(existing_app_settings_window, SW_SHOW);
       SetForegroundWindow(existing_app_settings_window);
       return true;
     }
     return false;
+  }
 }
 
 fn main() -> windows::core::Result<()> {

@@ -154,7 +154,28 @@
       });
 
       quitBtn.addEventListener('click', () => {
-        Window.this.parameters.quit();
+        var confirm = Window.this.modal(
+          <alert caption="Quit Algebrisk?">
+            <content>
+              <h1>Are you sure?</h1>
+              Quitting the program will prevent the keyboard
+              shortcuts from opening the search bar. You
+              will need to open Algebrisk again to re-enable
+              the keyboard shortcuts.
+              
+              If you just want to close the settings page, consider
+              clicking the "X" button in the upper right corner.
+            </content>
+            <buttons>
+              <button id="quit" role="default-button">Quit Algebrisk</button>
+              <button id="cancel" role="cancel-button">Cancel</button>
+            </buttons>
+          </alert>
+        );
+        
+        if (confirm === 'quit') {
+          Window.this.parameters.quit();
+        }
       });
 
       const copyOnEnter = document.querySelector('#copyOnEnter');
