@@ -4,6 +4,10 @@ version = "0.0.1"
 authors = ["Nick Hilton <nhilton777@gmail.com>"]
 license = "MIT/Apache-2.0"
 edition = "2018"
+build = "build.rs"
+[[bin]]
+name = "algebrisk"
+path = "src/main.rs"
 
 [dependencies]
 sciter-rs = "*"
@@ -25,3 +29,10 @@ features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_UI_Input_KeyboardAndMouse",
 ]
+
+[build-dependencies]
+winres = "*"
+
+[package.metadata.winres]
+OriginalFilename = "NICK.EXE"
+LegalCopyright = "Copyright Nick © 2022"

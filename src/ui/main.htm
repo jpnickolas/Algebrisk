@@ -10,7 +10,7 @@
         --bg-color: #ddd;
         --border-color: #aaa;
         --text-color: #444;
-        max-height: 200dip;
+        max-height: 310dip;
         margin: 4dip;
         overflow: hidden;
         border-radius: 24dip;
@@ -55,15 +55,18 @@
         display: none;
         margin: 0;
       }
+      .answer-text-container {
+        margin: 0 auto;
+        padding: 12dip 2dip;
+      }
       #answer {
         font-size: 32pt;
-        margin: 0 auto;
-        display: inline-block;
-        padding: 12dip;
+        display: inline;
+        text-align: center;
       }
       #copy {
         float: right;
-        margin: 22dip 12dip;
+        margin: 10dip 0dip;
         background: transparent;
         border: none;
         width: 32dip;
@@ -85,11 +88,11 @@
       <input id="query" placeholder="Enter a mathmatical expression" />
       <div id="answer-container">
         <div class="separator" />
-        <div>
-          <span id="answer" />
+        <div class="answer-text-container">
           <button id="copy" title="Copy answer text">
             <img src="copy.svg" />
           </button>
+          <span id="answer" />
         </div>
       </div>
     </div>

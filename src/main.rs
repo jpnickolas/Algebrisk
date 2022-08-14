@@ -1,4 +1,4 @@
-// #![windows_subsystem = "windows"]
+#![windows_subsystem = "windows"]
 
 extern crate dark_light;
 extern crate directories;
@@ -90,7 +90,7 @@ fn open_calc() {
   let assets = include_bytes!("../target/assets.rc");
 
   // Enable debug mode for all windows, so that we can inspect them via Inspector.
-  sciter::set_options(sciter::RuntimeOptions::DebugMode(true)).unwrap();
+  // sciter::set_options(sciter::RuntimeOptions::DebugMode(true)).unwrap();
   sciter::set_options(sciter::RuntimeOptions::ScriptFeatures(
     sciter::SCRIPT_RUNTIME_FEATURES::ALLOW_FILE_IO as u8
       | sciter::SCRIPT_RUNTIME_FEATURES::ALLOW_SYSINFO as u8,
@@ -98,7 +98,7 @@ fn open_calc() {
   .unwrap();
 
   let mut frame = sciter::window::Builder::tool()
-    .with_size((800, 200))
+    .with_size((800, 350))
     .with_pos((300, 300))
     .create();
 
