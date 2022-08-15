@@ -99,7 +99,6 @@ fn open_calc() {
 
   let mut frame = sciter::window::Builder::tool()
     .with_size((800, 350))
-    .with_pos((300, 300))
     .create();
 
   frame
