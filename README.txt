@@ -17,7 +17,7 @@ engine. This library supports a plethora of arithmetic operations such as:
   Operators: +, -, *, /, !, %, ^
   Functions: sin, cos, tan, sqrt, ceil, floor, pi, integrate, min, max, log
   Statements: Multiple arithmetic statements separated by semicolons (;)
-  Equations: f(x) = x*2; A(x) = { 1 if x <= 1 otherwise f(x) + A(x-1) }; A(10)
+  Equations: f(x) = x*2; A(x) = { f(x) + A(x-1) if x > 1; 0 otherwise }; A(10)
 
 For a more detailed list of supported features and functions, please read:
 https://raw.githubusercontent.com/PaddiM8/kalker/v2.0.0/cli/help.txt
