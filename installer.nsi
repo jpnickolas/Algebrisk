@@ -7,7 +7,7 @@ Section
 SetOutPath $INSTDIR
 
 File target\release\algebrisk.exe
-File target\release\sciter.dll
+File sciter.dll
 File README.txt
 
 WriteUninstaller $INSTDIR\uninstaller.exe
