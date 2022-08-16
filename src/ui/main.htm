@@ -254,6 +254,8 @@
       }
       applyTheme();
       globalThis.applyTheme = applyTheme;
+
+      document.on('blur', 'body', () => closeWindow());
     </script>
   </body>
 </html>
