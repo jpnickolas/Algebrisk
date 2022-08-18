@@ -9,8 +9,7 @@ extern crate windows;
 
 use msw_hotkey::Hotkey;
 use windows::{
-  Win32::Foundation::HWND, Win32::System::Registry::*, Win32::UI::Input::KeyboardAndMouse::*,
-  Win32::UI::WindowsAndMessaging::*,
+  Win32::Foundation::HWND, Win32::UI::Input::KeyboardAndMouse::*, Win32::UI::WindowsAndMessaging::*,
 };
 
 static mut LAST_KEYBOARD_SHORTCUT_ID: i32 = 0;
@@ -131,31 +130,6 @@ fn open_calc() {
   }
 }
 
-fn try_set_open_on_startup() {
-  let mut hkey = HKEY(0);
-  let path = std::env::current_exe().unwrap().canonicalize().unwrap();
-  let mut path_str = path.to_str().unwrap();
-  if path_str.starts_with("\\\\?\\") {
-    path_str = path_str.strip_prefix("\\\\?\\").unwrap();
-  }
-  let path_bytes = path_str.as_bytes();
-  unsafe {
-    RegCreateKeyA(
-      HKEY_CURRENT_USER,
-      windows::s!("Software\\Microsoft\\Windows\\CurrentVersion\\Run"),
-      &mut hkey,
-    );
-    RegSetValueExA(
-      hkey,
-      windows::s!("Algebrisk"),
-      0,
-      REG_SZ,
-      &path_bytes[0],
-      path_str.len() as u32,
-    );
-  }
-}
-
 fn init_working_dir() {
   let project = directories::ProjectDirs::from("", "", "Algebrisk").unwrap();
   let working_dir = project.config_dir();
@@ -189,7 +163,6 @@ fn main() -> windows::core::Result<()> {
     return Ok(());
   }
   init_working_dir();
-  try_set_open_on_startup();
   open_calc();
   return Ok(());
 }
