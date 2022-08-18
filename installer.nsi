@@ -33,7 +33,7 @@ WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Algebrisk"
 WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Algebrisk" \
                  "DisplayVersion" "1.0.0.1"
 
-Exec "$INSTDIR\algebrisk.exe /S"
+ShellExecAsUser::ShellExecAsUser open "$INSTDIR\algebrisk.exe"
 
 SectionEnd
 
