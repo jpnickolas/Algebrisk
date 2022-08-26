@@ -194,34 +194,11 @@ fn send_pipe_message(buf: &[u8]) -> bool {
 
 fn is_already_running() -> bool {
   let args: Vec<String> = std::env::args().collect();
-
   if args.contains(&String::from("silent")) {
     return send_pipe_message(b"ack");
   } else {
     return send_pipe_message(b"open");
   }
-
-  /*
-  // Just look for the settings window of another running algebrisk exe. There
-  // is a brief window where two executables can be launched at the same time
-  // before the settings window is created, but having two launched isn't that
-  // big of a deal.
-  unsafe {
-    let existing_app_settings_window = FindWindowA(
-      windows::core::PCSTR(std::ptr::null()),
-      windows::s!("Algebrisk: Settings"),
-    );
-    if existing_app_settings_window.0 != 0 {
-      if args.contains(&String::from("silent")) {
-        return true;
-      }
-
-      ShowWindow(existing_app_settings_window, SW_SHOW);
-      SetForegroundWindow(existing_app_settings_window);
-      return true;
-    }
-    return false;
-  }*/
 }
 
 fn main() -> windows::core::Result<()> {

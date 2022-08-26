@@ -17,7 +17,7 @@ File algebrisk.ico
 
 WriteUninstaller $INSTDIR\uninstall.exe
 
-WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Run" \
+WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" \
                  "Algebrisk" "$\"$INSTDIR\algebrisk.exe$\" silent"
 
 WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Algebrisk" \
@@ -51,5 +51,6 @@ Delete $INSTDIR\README.txt
 Delete $INSTDIR\uninstall.exe
 RMDir $INSTDIR
 DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Algebrisk"
+DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\Algebrisk" "Algebrisk"
 
 SectionEnd
