@@ -2,17 +2,21 @@
 
 extern crate dark_light;
 extern crate directories;
+extern crate interprocess;
 extern crate kalk;
 extern crate msw_hotkey;
 extern crate sciter;
 extern crate windows;
 
+use interprocess::local_socket::{LocalSocketListener, LocalSocketStream};
 use msw_hotkey::Hotkey;
+use std::io::prelude::*;
 use windows::{
   Win32::Foundation::HWND, Win32::UI::Input::KeyboardAndMouse::*, Win32::UI::WindowsAndMessaging::*,
 };
 
 static mut LAST_KEYBOARD_SHORTCUT_ID: i32 = 0;
+static NAMED_PIPE: &str = "\\\\.\\pipe\\Algebrisk";
 
 struct Handler {}
 
@@ -86,6 +90,7 @@ impl sciter::EventHandler for Handler {
 }
 
 fn open_calc() {
+  let listener = LocalSocketListener::bind(NAMED_PIPE).unwrap();
   let assets = include_bytes!("../target/assets.rc");
 
   // Enable debug mode for all windows, so that we can inspect them via Inspector.
@@ -112,6 +117,36 @@ fn open_calc() {
   frame.load_file("this://app/main.htm");
   frame.collapse(true);
 
+  let hwnd = frame.get_hwnd() as isize;
+
+  std::thread::spawn(move || -> Result<(), ()> {
+    for conn in listener.incoming() {
+      if conn.is_err() {
+        continue;
+      }
+      let mut conn = conn.unwrap();
+      let mut buffer: Vec<u8> = vec![0; 256];
+      conn.read(&mut buffer).unwrap_or_default();
+      let command = String::from_utf8(buffer).unwrap_or_default();
+      if command.contains("open") {
+        unsafe {
+          ShowWindow(HWND(hwnd), SW_SHOW);
+        }
+      }
+      conn.write_all(b"ack").unwrap_or_default();
+
+      if command.contains("quit") {
+        break;
+      }
+    }
+    Ok(())
+  });
+
+  let args: Vec<String> = std::env::args().collect();
+  if !args.contains(&String::from("silent")) {
+    frame.expand(false);
+  }
+
   unsafe {
     let mut msg = MSG::default();
     while GetMessageA(&mut msg, HWND(0), 0, 0).into() {
@@ -128,6 +163,7 @@ fn open_calc() {
       DispatchMessageW(&mut msg);
     }
   }
+  send_pipe_message(b"quit");
 }
 
 fn init_working_dir() {
@@ -139,7 +175,33 @@ fn init_working_dir() {
   std::env::set_current_dir(working_dir).unwrap();
 }
 
+fn send_pipe_message(buf: &[u8]) -> bool {
+  let conn = LocalSocketStream::connect(NAMED_PIPE);
+  if conn.is_err() {
+    return false;
+  }
+
+  let mut conn = conn.unwrap();
+  conn.write_all(buf).unwrap_or_default();
+
+  let mut buffer = String::new();
+  conn.read_to_string(&mut buffer).unwrap_or_default();
+  if buffer == "ack" {
+    return true;
+  }
+  return false;
+}
+
 fn is_already_running() -> bool {
+  let args: Vec<String> = std::env::args().collect();
+
+  if args.contains(&String::from("silent")) {
+    return send_pipe_message(b"ack");
+  } else {
+    return send_pipe_message(b"open");
+  }
+
+  /*
   // Just look for the settings window of another running algebrisk exe. There
   // is a brief window where two executables can be launched at the same time
   // before the settings window is created, but having two launched isn't that
@@ -150,12 +212,16 @@ fn is_already_running() -> bool {
       windows::s!("Algebrisk: Settings"),
     );
     if existing_app_settings_window.0 != 0 {
+      if args.contains(&String::from("silent")) {
+        return true;
+      }
+
       ShowWindow(existing_app_settings_window, SW_SHOW);
       SetForegroundWindow(existing_app_settings_window);
       return true;
     }
     return false;
-  }
+  }*/
 }
 
 fn main() -> windows::core::Result<()> {
